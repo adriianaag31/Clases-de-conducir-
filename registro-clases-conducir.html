@@ -268,6 +268,11 @@
   <header>
     <h1>Registro de clases prácticas</h1>
     <p>Apunta qué pasó en cada clase con el profesor y detecta qué falla de verdad: no lo que salió mal hoy, sino lo que se repite clase tras clase.</p>
+    <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+      <button class="btn ghost small" id="exportBackup">⬇ Descargar copia de seguridad</button>
+      <button class="btn ghost small" id="importBackupBtn">⬆ Restaurar copia de seguridad</button>
+      <input type="file" id="importBackupFile" accept="application/json" style="display:none;">
+    </div>
   </header>
 
   <div class="tabs">
@@ -343,17 +348,23 @@ function uid(){ return 'c_' + Date.now() + '_' + Math.random().toString(36).slic
 
 async function loadClases(){
   try{
-    const res = await window.storage.get(STORAGE_KEY);
-    clases = res ? JSON.parse(res.value) : [];
-  } catch(e){ clases = []; }
+    const raw = localStorage.getItem(STORAGE_KEY);
+    clases = raw ? JSON.parse(raw) : [];
+  } catch(e){
+    clases = [];
+  }
   document.getElementById('numero').value = (clases.length ? Math.max(...clases.map(c=>c.numero)) + 1 : 1);
   renderHistorial();
   renderAnalisis();
 }
 
 async function saveClases(){
-  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(clases)); }
-  catch(e){ console.error('No se pudo guardar', e); }
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clases));
+  } catch(e){
+    console.error('No se pudo guardar', e);
+    alert('No se ha podido guardar. Comprueba que tu navegador permite almacenamiento local para esta página.');
+  }
 }
 
 function escapeHTML(str){
@@ -450,6 +461,46 @@ function loadClassIntoForm(c){
 }
 
 document.getElementById('cancelEdit').addEventListener('click', resetForm);
+
+document.getElementById('exportBackup').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(clases, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'copia-seguridad-clases-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('importBackupBtn').addEventListener('click', () => {
+  document.getElementById('importBackupFile').click();
+});
+
+document.getElementById('importBackupFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try{
+      const imported = JSON.parse(reader.result);
+      if(!Array.isArray(imported)) throw new Error('formato inválido');
+      const existingIds = new Set(clases.map(c => c.id));
+      imported.forEach(c => { if(!existingIds.has(c.id)) clases.push(c); });
+      clases.sort((a,b) => a.numero - b.numero);
+      await saveClases();
+      renderHistorial();
+      renderAnalisis();
+      document.getElementById('numero').value = (clases.length ? Math.max(...clases.map(c=>c.numero)) + 1 : 1);
+      alert('Copia de seguridad restaurada correctamente.');
+    } catch(err){
+      alert('El archivo no parece una copia de seguridad válida.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
 
 document.getElementById('saveClass').addEventListener('click', async () => {
   const numero = parseInt(document.getElementById('numero').value) || (clases.length+1);
