@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de clases prácticas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink: #1B2430;
+    --ink-soft: #2A3648;
+    --paper: #EAE6DC;
+    --paper-dim: #C9C4B6;
+    --amber: #E8A33D;
+    --sage: #7C9885;
+    --rose: #C1666B;
+    --grey: #5A6577;
+    --line: rgba(234,230,220,0.14);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    padding: 32px 18px 80px;
+  }
+  .wrap{ max-width: 780px; margin:0 auto; }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 1.9rem;
+    margin: 0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    margin:0 0 22px;
+    color: var(--paper-dim);
+    font-size: 0.92rem;
+    max-width: 56ch;
+    line-height:1.5;
+  }
+
+  .tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tab{
+    background:none;
+    border:none;
+    color: var(--paper-dim);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 9px 4px;
+    margin-right: 18px;
+    cursor:pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active{ color: var(--amber); border-bottom-color: var(--amber); }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .card{
+    background: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--paper-dim);
+    margin-bottom: 5px;
+  }
+  input, textarea, select{
+    width:100%;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--paper);
+    padding: 8px 10px;
+    font-family:'Inter', sans-serif;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  input:focus, textarea:focus, select:focus{ outline:none; border-color: var(--amber); }
+  textarea{ min-height: 46px; resize: vertical; }
+
+  .row2{ display:flex; gap:12px; }
+  .row2 > div{ flex:1; }
+
+  .tema-row{
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    margin-bottom: 8px;
+    padding: 8px;
+    background: var(--ink);
+    border-radius: 6px;
+    border: 1px solid var(--line);
+  }
+  .tema-row input[type=text]{ margin-bottom:0; }
+  .tema-row select{ margin-bottom:0; width: auto; flex-shrink:0; }
+  .tema-row .rm{
+    background:none; border:none; color: var(--rose);
+    cursor:pointer; font-size: 1.1rem; line-height:1; padding: 4px 6px;
+  }
+
+  .btn{
+    background: var(--amber);
+    color: var(--ink);
+    border:none;
+    border-radius:6px;
+    padding: 9px 15px;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size: 0.85rem;
+    cursor:pointer;
+  }
+  .btn:hover{ filter: brightness(1.08); }
+  .btn.ghost{
+    background:transparent;
+    border:1px solid var(--line);
+    color: var(--paper-dim);
+    font-weight:500;
+  }
+  .btn.ghost:hover{ color: var(--paper); border-color: var(--paper-dim); }
+  .btn.small{ padding: 6px 11px; font-size: 0.78rem; }
+
+  .class-entry{
+    background: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .class-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:8px;
+  }
+  .class-head h3{
+    font-family:'Fraunces', serif;
+    font-size: 1.05rem;
+    margin:0;
+  }
+  .class-head .fecha{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--paper-dim);
+  }
+  .class-field{ margin-bottom: 8px; font-size: 0.87rem; }
+  .class-field .k{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .temas-list{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .tema-chip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 20px;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+  }
+  .tema-chip.falla{ background: rgba(193,102,107,0.18); color: var(--rose); }
+  .tema-chip.resuelto{ background: rgba(124,152,133,0.18); color: var(--sage); }
+  .tema-chip.neutral{ background: rgba(232,163,61,0.14); color: var(--amber); }
+
+  .class-footer{ display:flex; justify-content:flex-end; margin-top:10px; }
+
+  table.matrix{
+    width:100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  table.matrix th, table.matrix td{
+    border: 1px solid var(--line);
+    padding: 7px 8px;
+    text-align:center;
+  }
+  table.matrix th{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--paper-dim);
+    font-weight:500;
+  }
+  table.matrix td.tema-name{
+    text-align:left;
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+  }
+  .cell-falla{ color: var(--rose); font-weight:600; }
+  .cell-resuelto{ color: var(--sage); font-weight:600; }
+  .cell-neutral{ color: var(--amber); font-weight:600; }
+  .cell-empty{ color: var(--grey); }
+
+  .insight{
+    background: var(--ink-soft);
+    border-left: 3px solid var(--amber);
+    padding: 12px 14px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    line-height:1.5;
+  }
+  .insight b{ color: var(--amber); }
+
+  .empty{
+    text-align:center;
+    color: var(--paper-dim);
+    font-size: 0.9rem;
+    padding: 36px 20px;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+  }
+
+  input[type=file]{
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    color: var(--paper-dim);
+  }
+  .photo-preview{
+    max-width: 160px;
+    max-height: 160px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    margin-top: 8px;
+    display: block;
+  }
+  .class-link{
+    color: var(--amber);
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+  .class-photo{
+    max-width: 220px;
+    max-height: 220px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    margin-top: 6px;
+    display: block;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Registro de clases prácticas</h1>
+    <p>Apunta qué pasó en cada clase con el profesor y detecta qué falla de verdad: no lo que salió mal hoy, sino lo que se repite clase tras clase.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="nueva">+ Nueva clase</button>
+    <button class="tab" data-tab="historial">Historial</button>
+    <button class="tab" data-tab="analisis">Análisis</button>
+  </div>
+
+  <div class="panel active" id="panel-nueva">
+    <div class="card">
+      <div class="row2">
+        <div>
+          <label>Clase nº</label>
+          <input type="number" id="numero" min="1">
+        </div>
+        <div>
+          <label>Fecha</label>
+          <input type="date" id="fecha">
+        </div>
+      </div>
+      <label>Qué se hizo</label>
+      <textarea id="quehizo" placeholder="Ej: aparcamiento en línea, rotondas, tráfico en avenida"></textarea>
+
+      <label>Temas de la clase</label>
+      <div id="temasContainer"></div>
+      <button class="btn ghost small" id="addTema" type="button">+ Añadir tema</button>
+
+      <div style="margin-top:14px;">
+        <label>Para la próxima clase</label>
+        <textarea id="paraproxima" placeholder="Acción concreta: qué pedir o repasar antes de la siguiente"></textarea>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Enlace (opcional)</label>
+          <input type="url" id="enlace" placeholder="Ej: vídeo de la maniobra, mapa de la ruta...">
+        </div>
+        <div>
+          <label>Foto (opcional)</label>
+          <input type="file" id="foto" accept="image/*">
+          <img id="fotoPreview" class="photo-preview" style="display:none;">
+        </div>
+      </div>
+
+      <div class="class-footer">
+        <button class="btn ghost small" id="cancelEdit" style="display:none;">Cancelar edición</button>
+        <button class="btn" id="saveClass">Guardar clase</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-historial">
+    <div id="classList"></div>
+    <div class="empty" id="emptyHistorial" style="display:none;">Todavía no has registrado ninguna clase.</div>
+  </div>
+
+  <div class="panel" id="panel-analisis">
+    <div id="insights"></div>
+    <div class="card" id="matrixCard" style="overflow-x:auto;">
+      <table class="matrix" id="matrixTable"></table>
+    </div>
+    <div class="empty" id="emptyAnalisis" style="display:none;">Registra al menos una clase con temas para ver el análisis.</div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'clases-conducir-v1';
+let clases = [];
+let temaRowCount = 0;
+let editingId = null;
+
+function uid(){ return 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+
+async function loadClases(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY);
+    clases = res ? JSON.parse(res.value) : [];
+  } catch(e){ clases = []; }
+  document.getElementById('numero').value = (clases.length ? Math.max(...clases.map(c=>c.numero)) + 1 : 1);
+  renderHistorial();
+  renderAnalisis();
+}
+
+async function saveClases(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(clases)); }
+  catch(e){ console.error('No se pudo guardar', e); }
+}
+
+function escapeHTML(str){
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+function addTemaRow(nombre='', estado='falla', nota=''){
+  const id = 'tr_' + (temaRowCount++);
+  const container = document.getElementById('temasContainer');
+  const row = document.createElement('div');
+  row.className = 'tema-row';
+  row.dataset.id = id;
+  row.innerHTML = `
+    <input type="text" placeholder="Tema (ej: rotondas)" class="tema-nombre" value="${escapeHTML(nombre)}">
+    <select class="tema-estado">
+      <option value="falla" ${estado==='falla'?'selected':''}>✗ Falla</option>
+      <option value="resuelto" ${estado==='resuelto'?'selected':''}>✓ Resuelto</option>
+      <option value="neutral" ${estado==='neutral'?'selected':''}>~ Trabajado</option>
+    </select>
+    <button type="button" class="rm">×</button>
+  `;
+  row.querySelector('.rm').addEventListener('click', () => row.remove());
+  container.appendChild(row);
+}
+document.getElementById('addTema').addEventListener('click', () => addTemaRow());
+addTemaRow();
+
+let fotoDataUrl = '';
+document.getElementById('foto').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) { fotoDataUrl = ''; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    fotoDataUrl = reader.result;
+    const preview = document.getElementById('fotoPreview');
+    preview.src = fotoDataUrl;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+function resetForm(){
+  document.getElementById('quehizo').value = '';
+  document.getElementById('paraproxima').value = '';
+  document.getElementById('temasContainer').innerHTML = '';
+  addTemaRow();
+  document.getElementById('numero').value = (clases.length ? Math.max(...clases.map(c=>c.numero)) + 1 : 1);
+  document.getElementById('fecha').value = '';
+  document.getElementById('enlace').value = '';
+  document.getElementById('foto').value = '';
+  document.getElementById('fotoPreview').style.display = 'none';
+  fotoDataUrl = '';
+  editingId = null;
+  document.getElementById('saveClass').textContent = 'Guardar clase';
+  document.getElementById('cancelEdit').style.display = 'none';
+}
+
+function loadClassIntoForm(c){
+  editingId = c.id;
+  document.getElementById('numero').value = c.numero;
+  document.getElementById('fecha').value = c.fecha || '';
+  document.getElementById('quehizo').value = c.quehizo || '';
+  document.getElementById('paraproxima').value = c.paraproxima || '';
+  document.getElementById('enlace').value = c.enlace || '';
+  fotoDataUrl = c.foto || '';
+  const preview = document.getElementById('fotoPreview');
+  if(fotoDataUrl){ preview.src = fotoDataUrl; preview.style.display = 'block'; }
+  else { preview.style.display = 'none'; }
+  document.getElementById('temasContainer').innerHTML = '';
+  if((c.temas||[]).length){
+    c.temas.forEach(t => addTemaRow(t.nombre, t.estado));
+  } else {
+    addTemaRow();
+  }
+  document.getElementById('saveClass').textContent = 'Guardar cambios';
+  document.getElementById('cancelEdit').style.display = 'inline-block';
+
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('.tab[data-tab="nueva"]').classList.add('active');
+  document.getElementById('panel-nueva').classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('cancelEdit').addEventListener('click', resetForm);
+
+document.getElementById('saveClass').addEventListener('click', async () => {
+  const numero = parseInt(document.getElementById('numero').value) || (clases.length+1);
+  const fecha = document.getElementById('fecha').value || new Date().toISOString().slice(0,10);
+  const quehizo = document.getElementById('quehizo').value.trim();
+  const paraproxima = document.getElementById('paraproxima').value.trim();
+  const temas = [];
+  document.querySelectorAll('#temasContainer .tema-row').forEach(row => {
+    const nombre = row.querySelector('.tema-nombre').value.trim();
+    if(!nombre) return;
+    temas.push({ nombre, estado: row.querySelector('.tema-estado').value });
+  });
+
+  const enlace = document.getElementById('enlace').value.trim();
+
+  if(editingId){
+    const idx = clases.findIndex(c => c.id === editingId);
+    if(idx !== -1){
+      clases[idx] = { ...clases[idx], numero, fecha, quehizo, paraproxima, temas, enlace, foto: fotoDataUrl };
+    }
+  } else {
+    clases.push({ id: uid(), numero, fecha, quehizo, paraproxima, temas, enlace, foto: fotoDataUrl });
+  }
+  clases.sort((a,b) => a.numero - b.numero);
+  await saveClases();
+
+  resetForm();
+
+  renderHistorial();
+  renderAnalisis();
+});
+
+function renderHistorial(){
+  const list = document.getElementById('classList');
+  const empty = document.getElementById('emptyHistorial');
+  list.innerHTML = '';
+  empty.style.display = clases.length ? 'none' : 'block';
+
+  clases.slice().reverse().forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'class-entry';
+    const chips = (c.temas||[]).map(t =>
+      `<span class="tema-chip ${t.estado}">${t.estado==='falla'?'✗':t.estado==='resuelto'?'✓':'~'} ${escapeHTML(t.nombre)}</span>`
+    ).join('');
+    div.innerHTML = `
+      <div class="class-head">
+        <h3>Clase ${c.numero}</h3>
+        <span class="fecha">${c.fecha ? new Date(c.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}) : ''}</span>
+      </div>
+      ${c.quehizo ? `<div class="class-field"><div class="k">Qué se hizo</div>${escapeHTML(c.quehizo)}</div>` : ''}
+      ${chips ? `<div class="class-field"><div class="k">Temas</div><div class="temas-list">${chips}</div></div>` : ''}
+      ${c.paraproxima ? `<div class="class-field"><div class="k">Para la próxima</div>${escapeHTML(c.paraproxima)}</div>` : ''}
+      ${c.enlace ? `<div class="class-field"><div class="k">Enlace</div><a class="class-link" href="${escapeHTML(c.enlace)}" target="_blank" rel="noopener">${escapeHTML(c.enlace)}</a></div>` : ''}
+      ${c.foto ? `<div class="class-field"><div class="k">Foto</div><img class="class-photo" src="${c.foto}" onclick="window.open(this.src)"></div>` : ''}
+      <div class="class-footer">
+        <button class="btn ghost small edit-class" data-id="${c.id}">Editar</button>
+        <button class="btn ghost small del-class" data-id="${c.id}" style="margin-left:8px;">Eliminar</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+
+  list.querySelectorAll('.edit-class').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const c = clases.find(c => c.id === btn.dataset.id);
+      if(c) loadClassIntoForm(c);
+    });
+  });
+
+  list.querySelectorAll('.del-class').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      clases = clases.filter(c => c.id !== btn.dataset.id);
+      await saveClases();
+      renderHistorial();
+      renderAnalisis();
+    });
+  });
+}
+
+function renderAnalisis(){
+  const table = document.getElementById('matrixTable');
+  const emptyEl = document.getElementById('emptyAnalisis');
+  const insightsEl = document.getElementById('insights');
+  table.innerHTML = '';
+  insightsEl.innerHTML = '';
+
+  const allTemas = new Set();
+  clases.forEach(c => (c.temas||[]).forEach(t => allTemas.add(t.nombre.trim().toLowerCase())));
+
+  if(allTemas.size === 0){
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  const temaDisplay = {};
+  clases.forEach(c => (c.temas||[]).forEach(t => { temaDisplay[t.nombre.trim().toLowerCase()] = t.nombre.trim(); }));
+
+  const temaList = Array.from(allTemas);
+  const numeros = clases.map(c => c.numero);
+
+  temaList.forEach(temaKey => {
+    const apariciones = clases
+      .filter(c => (c.temas||[]).some(t => t.nombre.trim().toLowerCase() === temaKey))
+      .map(c => ({ numero: c.numero, estado: c.temas.find(t => t.nombre.trim().toLowerCase() === temaKey).estado }));
+    const fallasSeguidas = apariciones.filter(a => a.estado === 'falla').length;
+    const ultimoEstado = apariciones[apariciones.length-1]?.estado;
+    if(fallasSeguidas >= 2 && ultimoEstado === 'falla'){
+      const div = document.createElement('div');
+      div.className = 'insight';
+      div.innerHTML = `<b>${escapeHTML(temaDisplay[temaKey])}</b> sigue fallando después de ${fallasSeguidas} clases donde se trabajó. Puede ser tu prioridad real para la próxima sesión.`;
+      insightsEl.appendChild(div);
+    }
+  });
+
+  let thead = '<tr><th style="text-align:left;">Tema</th>' + numeros.map(n => `<th>C${n}</th>`).join('') + '</tr>';
+  let rows = temaList.map(temaKey => {
+    let cells = numeros.map(n => {
+      const c = clases.find(c => c.numero === n);
+      const t = (c.temas||[]).find(t => t.nombre.trim().toLowerCase() === temaKey);
+      if(!t) return '<td class="cell-empty">—</td>';
+      if(t.estado === 'falla') return '<td class="cell-falla">✗</td>';
+      if(t.estado === 'resuelto') return '<td class="cell-resuelto">✓</td>';
+      return '<td class="cell-neutral">~</td>';
+    }).join('');
+    return `<tr><td class="tema-name">${escapeHTML(temaDisplay[temaKey])}</td>${cells}</tr>`;
+  }).join('');
+
+  table.innerHTML = thead + rows;
+}
+
+loadClases();
+</script>
+</body>
+</html>
